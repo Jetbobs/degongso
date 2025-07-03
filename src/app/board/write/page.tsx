@@ -8,6 +8,7 @@ import TiptapEditor from "@/components/TiptapEditor";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function WritePage() {
   const router = useRouter();
@@ -19,7 +20,7 @@ export default function WritePage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title.trim() || !formData.content.trim()) {
-      alert("제목과 내용을 입력해주세요.");
+      toast.error("제목과 내용을 입력해주세요.");
       return;
     }
 
@@ -33,7 +34,7 @@ export default function WritePage() {
     };
 
     console.log("새 게시글:", newPost);
-    alert("게시글이 작성되었습니다!");
+    toast.success("게시글이 작성되었습니다!");
     router.push("/board");
   };
 

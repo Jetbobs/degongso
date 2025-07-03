@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,6 +19,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  CommentSkeleton,
+  EmptyComments,
+  LoadingButton,
+} from "@/components/LoadingStates";
 
 interface Comment {
   id: number;
@@ -64,16 +70,32 @@ export default function CommentSection({ postId }: CommentSectionProps) {
   });
   const [replyForms, setReplyForms] = useState<{ [key: number]: boolean }>({});
   const [replyData, setReplyData] = useState<{ [key: number]: string }>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submittingReply, setSubmittingReply] = useState<{
+    [key: number]: boolean;
+  }>({});
 
   // 댓글 불러오기
   useEffect(() => {
-    const savedComments = localStorage.getItem(`comments_${postId}`);
-    if (savedComments) {
-      const parsedComments = JSON.parse(savedComments);
-      if (parsedComments.length > 0) {
-        setComments(parsedComments);
+    const loadComments = async () => {
+      setIsLoading(true);
+
+      // 로딩 시뮬레이션
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      const savedComments = localStorage.getItem(`comments_${postId}`);
+      if (savedComments) {
+        const parsedComments = JSON.parse(savedComments);
+        if (parsedComments.length > 0) {
+          setComments(parsedComments);
+        }
       }
-    }
+
+      setIsLoading(false);
+    };
+
+    loadComments();
   }, [postId]);
 
   // 댓글 저장
@@ -83,13 +105,18 @@ export default function CommentSection({ postId }: CommentSectionProps) {
   };
 
   // 댓글 작성
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.content.trim()) {
-      alert("내용을 입력해주세요.");
+      toast.error("내용을 입력해주세요.");
       return;
     }
+
+    setIsSubmitting(true);
+
+    // 작성 시뮬레이션
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     const newComment: Comment = {
       id: Date.now(),
@@ -104,17 +131,23 @@ export default function CommentSection({ postId }: CommentSectionProps) {
 
     // 폼 초기화
     setFormData({ content: "" });
-    alert("댓글이 작성되었습니다!");
+    setIsSubmitting(false);
+    toast.success("댓글이 작성되었습니다!");
   };
 
   // 대댓글 작성
-  const handleReplySubmit = (parentId: number) => {
+  const handleReplySubmit = async (parentId: number) => {
     const replyContent = replyData[parentId];
 
     if (!replyContent?.trim()) {
-      alert("내용을 입력해주세요.");
+      toast.error("내용을 입력해주세요.");
       return;
     }
+
+    setSubmittingReply((prev) => ({ ...prev, [parentId]: true }));
+
+    // 답글 작성 시뮬레이션
+    await new Promise((resolve) => setTimeout(resolve, 800));
 
     const newReply: Comment = {
       id: Date.now(),
@@ -131,7 +164,8 @@ export default function CommentSection({ postId }: CommentSectionProps) {
     // 답글 폼 초기화 및 숨기기
     setReplyData((prev) => ({ ...prev, [parentId]: "" }));
     setReplyForms((prev) => ({ ...prev, [parentId]: false }));
-    alert("답글이 작성되었습니다!");
+    setSubmittingReply((prev) => ({ ...prev, [parentId]: false }));
+    toast.success("답글이 작성되었습니다!");
   };
 
   // 댓글 삭제
@@ -141,7 +175,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
       (comment) => comment.id !== commentId && comment.parentId !== commentId
     );
     saveComments(updatedComments);
-    alert("댓글이 삭제되었습니다!");
+    toast.success("댓글이 삭제되었습니다!");
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -245,20 +279,23 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                     className="shadow-none rounded-none min-h-[80px]"
                   />
                   <div className="flex gap-2 justify-end">
-                    <Button
+                    <LoadingButton
                       type="button"
                       size="sm"
                       onClick={() => handleReplySubmit(comment.id)}
                       className="shadow-none"
+                      isLoading={submittingReply[comment.id]}
+                      loadingText="작성 중..."
                     >
                       답글 작성
-                    </Button>
+                    </LoadingButton>
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
                       onClick={() => toggleReplyForm(comment.id)}
                       className="shadow-none"
+                      disabled={submittingReply[comment.id]}
                     >
                       취소
                     </Button>
@@ -294,10 +331,15 @@ export default function CommentSection({ postId }: CommentSectionProps) {
 
         {/* 댓글 목록 */}
         <div className="space-y-4">
-          {parentComments.length > 0 &&
+          {isLoading ? (
+            <CommentSkeleton count={3} />
+          ) : parentComments.length > 0 ? (
             parentComments.map((comment) => (
               <div key={comment.id}>{renderComment(comment)}</div>
-            ))}
+            ))
+          ) : (
+            <EmptyComments />
+          )}
         </div>
 
         <CardContent className="px-4 sm:px-6">
@@ -314,9 +356,14 @@ export default function CommentSection({ postId }: CommentSectionProps) {
               />
             </div>
             <div className="flex justify-end">
-              <Button type="submit" className="shadow-none">
+              <LoadingButton
+                type="submit"
+                className="shadow-none"
+                isLoading={isSubmitting}
+                loadingText="작성 중..."
+              >
                 댓글 작성
-              </Button>
+              </LoadingButton>
             </div>
           </form>
         </CardContent>

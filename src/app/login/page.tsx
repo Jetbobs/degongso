@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -25,15 +26,30 @@ export default function LoginPage() {
     // 임시 로그인 로직 (실제로는 서버 API 호출)
     console.log("로그인 시도:", formData);
 
-    // 간단한 더미 로그인 체크
-    if (
-      formData.email === "admin@degongso.com" &&
-      formData.password === "123456"
-    ) {
-      alert("로그인 성공!");
+    // 사용자 인증 확인
+    const users = JSON.parse(localStorage.getItem("users") || "[]");
+    const user = users.find(
+      (u: any) => u.email === formData.email && u.password === formData.password
+    );
+
+    // 기본 admin 계정도 유지
+    const isAdmin =
+      formData.email === "admin@degongso.com" && formData.password === "123456";
+
+    if (user || isAdmin) {
+      const currentUser = user || {
+        id: 0,
+        email: "admin@degongso.com",
+        nickname: "관리자",
+      };
+
+      // 현재 로그인한 사용자 정보 저장
+      localStorage.setItem("currentUser", JSON.stringify(currentUser));
+
+      toast.success(`${currentUser.nickname}님, 환영합니다!`);
       router.push("/");
     } else {
-      alert("이메일 또는 비밀번호가 올바르지 않습니다.");
+      toast.error("이메일 또는 비밀번호가 올바르지 않습니다.");
     }
 
     setIsLoading(false);
@@ -141,6 +157,9 @@ export default function LoginPage() {
             이메일: admin@degongso.com
             <br />
             비밀번호: 123456
+            <br />
+            <br />
+            또는 회원가입 후 새 계정으로 로그인하세요!
           </p>
         </div>
 

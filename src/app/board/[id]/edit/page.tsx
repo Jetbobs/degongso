@@ -8,6 +8,7 @@ import TiptapEditor from "@/components/TiptapEditor";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 // 더미 데이터
 const dummyPost = {
@@ -90,7 +91,7 @@ export default function EditPage() {
       !formData.author.trim() ||
       !formData.content.trim()
     ) {
-      alert("모든 필드를 입력해주세요.");
+      toast.error("모든 필드를 입력해주세요.");
       return;
     }
 
@@ -109,7 +110,7 @@ export default function EditPage() {
     localStorage.setItem(`post_${postId}`, JSON.stringify(updatedPost));
 
     console.log("게시글 수정:", updatedPost);
-    alert("게시글이 수정되었습니다!");
+    toast.success("게시글이 수정되었습니다!");
     router.push(`/board/${postId}`);
   };
 

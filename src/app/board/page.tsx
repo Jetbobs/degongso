@@ -19,8 +19,26 @@ import {
 } from "@/components/ui/pagination";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  PostListSkeleton,
+  EmptyPostList,
+  EmptySearchResult,
+} from "@/components/LoadingStates";
+import {
+  EnhancedSearchInput,
+  HighlightText,
+  SearchStats,
+} from "@/components/SearchUtils";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { ChevronFirst, ChevronLast } from "lucide-react";
 
 // 더미 데이터
 const dummyPosts = [
@@ -30,6 +48,8 @@ const dummyPosts = [
     author: "김개발",
     date: "2024-01-15",
     views: 245,
+    content:
+      "Next.js 14에서는 Server Components, Turbopack, App Router 등 많은 새로운 기능들이 추가되었습니다. 특히 성능 개선과 개발자 경험 향상에 중점을 두었습니다.",
   },
   {
     id: 2,
@@ -37,6 +57,8 @@ const dummyPosts = [
     author: "이디자인",
     date: "2024-01-14",
     views: 189,
+    content:
+      "Tailwind CSS를 효율적으로 사용하는 방법들을 소개합니다. 유틸리티 클래스, 커스텀 컴포넌트, 반응형 디자인 구현 방법 등을 다룹니다.",
   },
   {
     id: 3,
@@ -44,6 +66,8 @@ const dummyPosts = [
     author: "박프론트",
     date: "2024-01-13",
     views: 167,
+    content:
+      "shadcn/ui는 Radix UI 기반의 아름다운 컴포넌트 라이브러리입니다. 설치부터 커스터마이징까지 전체적인 사용법을 설명합니다.",
   },
   {
     id: 4,
@@ -51,6 +75,8 @@ const dummyPosts = [
     author: "최리액트",
     date: "2024-01-12",
     views: 298,
+    content:
+      "React 18에서 추가된 useId, useTransition, useDeferredValue 등의 새로운 훅들과 Concurrent Features에 대해 알아봅니다.",
   },
   {
     id: 5,
@@ -58,6 +84,8 @@ const dummyPosts = [
     author: "정타입",
     date: "2024-01-11",
     views: 221,
+    content:
+      "TypeScript 5.0의 주요 변경사항들을 살펴봅니다. Decorators, const assertions, 성능 개선 사항들을 중심으로 설명합니다.",
   },
   {
     id: 6,
@@ -65,6 +93,8 @@ const dummyPosts = [
     author: "홍트렌드",
     date: "2024-01-10",
     views: 412,
+    content:
+      "2024년 웹 개발 트렌드를 분석합니다. AI 도구 활용, 풀스택 프레임워크, 엣지 컴퓨팅, 웹 성능 최적화 등의 키워드를 중심으로 살펴봅니다.",
   },
   {
     id: 7,
@@ -72,6 +102,8 @@ const dummyPosts = [
     author: "송자바",
     date: "2024-01-09",
     views: 356,
+    content:
+      "ES2024에서 추가된 새로운 자바스크립트 기능들을 소개합니다. 새로운 메서드, 연산자, 문법 등을 예제와 함께 설명합니다.",
   },
   {
     id: 8,
@@ -79,6 +111,8 @@ const dummyPosts = [
     author: "이디자인",
     date: "2024-01-08",
     views: 189,
+    content:
+      "CSS Grid와 Flexbox의 차이점을 알아보고, 각각을 언제 사용해야 하는지 실제 예제를 통해 설명합니다.",
   },
   {
     id: 9,
@@ -86,6 +120,8 @@ const dummyPosts = [
     author: "백엔드김",
     date: "2024-01-07",
     views: 267,
+    content:
+      "Node.js 애플리케이션의 성능을 개선하는 다양한 방법들을 소개합니다. 메모리 관리, 비동기 처리, 캐싱 전략 등을 다룹니다.",
   },
   {
     id: 10,
@@ -93,6 +129,8 @@ const dummyPosts = [
     author: "데브옵스박",
     date: "2024-01-06",
     views: 198,
+    content:
+      "효과적인 Git 브랜치 전략에 대해 알아봅니다. Git Flow, GitHub Flow, GitLab Flow 등의 워크플로우를 비교분석합니다.",
   },
   {
     id: 11,
@@ -100,6 +138,8 @@ const dummyPosts = [
     author: "모바일정",
     date: "2024-01-05",
     views: 145,
+    content:
+      "모바일 우선 반응형 디자인의 핵심 원칙과 실무 팁을 소개합니다. 미디어 쿼리, 플렉시블 그리드, 터치 인터페이스 고려사항 등을 다룹니다.",
   },
   {
     id: 12,
@@ -107,6 +147,8 @@ const dummyPosts = [
     author: "접근성최",
     date: "2024-01-04",
     views: 123,
+    content:
+      "웹 접근성 가이드라인 WCAG를 바탕으로 모든 사용자가 이용할 수 있는 웹사이트를 만드는 방법을 설명합니다.",
   },
   {
     id: 13,
@@ -273,8 +315,19 @@ const dummyPosts = [
 
 export default function BoardPage() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchType, setSearchType] = useState("all"); // all, title, content, author
   const [currentPage, setCurrentPage] = useState(1);
-  const postsPerPage = 25;
+  const [postsPerPage, setPostsPerPage] = useState(25);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // 초기 로딩 시뮬레이션
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000); // 1초 로딩 시뮬레이션
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // 댓글 개수 가져오기 함수
   const getCommentCount = (postId: number): number => {
@@ -285,11 +338,31 @@ export default function BoardPage() {
     return 0;
   };
 
-  const filteredPosts = dummyPosts.filter(
-    (post) =>
-      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.author.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // 검색 타입에 따른 필터링
+  const filteredPosts = dummyPosts.filter((post) => {
+    if (!searchTerm.trim()) return true;
+
+    const searchLower = searchTerm.toLowerCase();
+    const defaultContent =
+      post.content ||
+      `${post.title}에 대한 내용입니다. 프론트엔드 개발, JavaScript, React, TypeScript 등 웹 개발 관련 주제를 다룹니다.`;
+
+    switch (searchType) {
+      case "title":
+        return post.title.toLowerCase().includes(searchLower);
+      case "content":
+        return defaultContent.toLowerCase().includes(searchLower);
+      case "author":
+        return post.author.toLowerCase().includes(searchLower);
+      case "all":
+      default:
+        return (
+          post.title.toLowerCase().includes(searchLower) ||
+          post.author.toLowerCase().includes(searchLower) ||
+          defaultContent.toLowerCase().includes(searchLower)
+        );
+    }
+  });
 
   // 전체 페이지 수 계산
   const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
@@ -301,105 +374,266 @@ export default function BoardPage() {
 
   // 페이지 변경 함수
   const handlePageChange = (page: number) => {
+    setIsLoading(true);
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
+
+    // 짧은 로딩 시뮬레이션
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 300);
   };
 
-  // 검색 시 첫 페이지로 이동
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
+  // 검색 핸들러
+  const handleSearch = (term: string) => {
+    setSearchTerm(term);
     setCurrentPage(1);
+    setIsLoading(true);
+
+    // 검색 로딩 시뮬레이션
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+  };
+
+  const handleSearchInputChange = (value: string) => {
+    setSearchTerm(value);
+  };
+
+  const handleSearchTypeChange = (type: string) => {
+    setSearchType(type);
+    setCurrentPage(1);
+    if (searchTerm.trim()) {
+      setIsLoading(true);
+      // 검색 타입 변경 시 로딩 시뮬레이션
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 300);
+    }
+  };
+
+  // 검색 타입에 따른 플레이스홀더 텍스트
+  const getPlaceholder = () => {
+    switch (searchType) {
+      case "title":
+        return "제목으로 검색...";
+      case "content":
+        return "내용으로 검색...";
+      case "author":
+        return "작성자로 검색...";
+      case "all":
+      default:
+        return "제목, 내용, 작성자로 검색...";
+    }
+  };
+
+  // 페이지 당 항목 수 변경
+  const handlePostsPerPageChange = (value: string) => {
+    setIsLoading(true);
+    setPostsPerPage(Number(value));
+    setCurrentPage(1);
+
+    // 짧은 로딩 시뮬레이션
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 300);
+  };
+
+  // 스마트한 페이지 번호 생성 함수
+  const generatePageNumbers = () => {
+    const pages: (number | string)[] = [];
+    const maxPages = 7; // 모바일에서는 5개, 데스크톱에서는 7개
+
+    if (totalPages <= maxPages) {
+      // 전체 페이지가 적으면 모두 표시
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // 복잡한 경우 스마트하게 표시
+      if (currentPage <= 4) {
+        // 앞쪽 페이지들
+        for (let i = 1; i <= 5; i++) {
+          pages.push(i);
+        }
+        pages.push("...");
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 3) {
+        // 뒤쪽 페이지들
+        pages.push(1);
+        pages.push("...");
+        for (let i = totalPages - 4; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        // 중간 페이지들
+        pages.push(1);
+        pages.push("...");
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pages.push(i);
+        }
+        pages.push("...");
+        pages.push(totalPages);
+      }
+    }
+
+    return pages;
   };
 
   return (
     <div className="container mx-auto px-4 sm:px-6 py-8">
       <div className="max-w-6xl mx-auto">
         {/* 헤더 */}
-        <div className="mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl sm:text-3xl font-bold">게시판</h1>
+
+          {/* 페이지 당 항목 수 선택 */}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span className="hidden sm:inline">페이지당</span>
+            <Select
+              value={postsPerPage.toString()}
+              onValueChange={handlePostsPerPageChange}
+            >
+              <SelectTrigger className="w-20 h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="25">25</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectContent>
+            </Select>
+            <span className="hidden sm:inline">개씩</span>
+          </div>
         </div>
 
         <Separator className="mb-6" />
 
-        {/* 반응형 테이블 뷰 */}
+        {/* 게시글 목록 영역 */}
         <div className="border-t border-b overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[60px] sm:w-[80px] text-xs sm:text-sm text-center">
-                  번호
-                </TableHead>
-                <TableHead className="text-xs sm:text-sm">제목</TableHead>
-                <TableHead className="hidden sm:table-cell w-[120px] text-xs sm:text-sm">
-                  작성자
-                </TableHead>
-                <TableHead className="hidden sm:table-cell w-[120px] text-xs sm:text-sm">
-                  작성일
-                </TableHead>
-                <TableHead className="hidden sm:table-cell w-[80px] text-xs sm:text-sm">
-                  조회/댓글
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {currentPosts.length > 0 ? (
-                currentPosts.map((post) => (
-                  <TableRow key={post.id} className="hover:bg-muted/50">
-                    <TableCell className="text-xs sm:text-sm text-center">
-                      {post.id}
-                    </TableCell>
-                    <TableCell className="text-xs sm:text-sm">
-                      <Link
-                        href={`/board/${post.id}`}
-                        className="cursor-pointer hover:text-primary hover:underline line-clamp-2 sm:line-clamp-1"
-                      >
-                        {post.title}
-                      </Link>
-                      {/* 모바일에서만 표시되는 부가 정보 */}
-                      <div className="sm:hidden mt-1 text-xs text-gray-400 space-y-0.5">
-                        <div>
-                          {post.author} · {post.date} · 조회 {post.views} · 댓글{" "}
-                          {getCommentCount(post.id)}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell text-xs sm:text-sm">
-                      {post.author}
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell text-xs sm:text-sm">
-                      {post.date}
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell text-xs sm:text-sm">
-                      {post.views} / {getCommentCount(post.id)}
-                    </TableCell>
-                  </TableRow>
-                ))
+          {isLoading ? (
+            <PostListSkeleton />
+          ) : (
+            <>
+              {/* 빈 상태 처리 */}
+              {filteredPosts.length === 0 ? (
+                searchTerm ? (
+                  <EmptySearchResult searchTerm={searchTerm} />
+                ) : dummyPosts.length === 0 ? (
+                  <EmptyPostList />
+                ) : (
+                  <EmptySearchResult searchTerm={searchTerm} />
+                )
               ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={5}
-                    className="text-center py-8 text-muted-foreground text-xs sm:text-sm"
-                  >
-                    검색 결과가 없습니다.
-                  </TableCell>
-                </TableRow>
+                /* 게시글 테이블 */
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[60px] sm:w-[80px] text-xs sm:text-sm text-center">
+                        번호
+                      </TableHead>
+                      <TableHead className="text-xs sm:text-sm">제목</TableHead>
+                      <TableHead className="hidden sm:table-cell w-[120px] text-xs sm:text-sm">
+                        작성자
+                      </TableHead>
+                      <TableHead className="hidden sm:table-cell w-[120px] text-xs sm:text-sm">
+                        작성일
+                      </TableHead>
+                      <TableHead className="hidden sm:table-cell w-[80px] text-xs sm:text-sm">
+                        조회
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {currentPosts.map((post) => (
+                      <TableRow key={post.id} className="hover:bg-muted/50">
+                        <TableCell className="text-xs sm:text-sm text-center">
+                          {post.id}
+                        </TableCell>
+                        <TableCell className="text-xs sm:text-sm">
+                          <Link
+                            href={`/board/${post.id}`}
+                            className="cursor-pointer hover:text-primary hover:underline line-clamp-2 sm:line-clamp-1"
+                          >
+                            <HighlightText
+                              text={post.title}
+                              searchTerm={searchTerm}
+                            />
+                            {getCommentCount(post.id) > 0 && (
+                              <span className="text-muted-foreground">
+                                ({getCommentCount(post.id)})
+                              </span>
+                            )}
+                          </Link>
+                          {/* 모바일에서만 표시되는 부가 정보 */}
+                          <div className="sm:hidden mt-1 text-xs text-gray-400 space-y-0.5">
+                            <div>
+                              <HighlightText
+                                text={post.author}
+                                searchTerm={searchTerm}
+                              />{" "}
+                              · {post.date} · 조회 {post.views}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="hidden sm:table-cell text-xs sm:text-sm">
+                          <HighlightText
+                            text={post.author}
+                            searchTerm={searchTerm}
+                          />
+                        </TableCell>
+                        <TableCell className="hidden sm:table-cell text-xs sm:text-sm">
+                          {post.date}
+                        </TableCell>
+                        <TableCell className="hidden sm:table-cell text-xs sm:text-sm">
+                          {post.views}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               )}
-            </TableBody>
-          </Table>
+            </>
+          )}
         </div>
 
         {/* 검색 및 새 글 작성 */}
         <div className="mt-6 mb-6 flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
-          <div className="hidden sm:block flex-1"></div>
-          <div className="flex-1 max-w-md mx-auto">
-            <Input
-              placeholder="제목 또는 작성자로 검색..."
-              value={searchTerm}
-              onChange={handleSearchChange}
-              className="w-full shadow-none"
-            />
+          <SearchStats
+            totalCount={dummyPosts.length}
+            filteredCount={filteredPosts.length}
+            searchTerm={searchTerm}
+            searchType={searchType}
+          />
+          <div className="flex-1 max-w-2xl mx-auto">
+            <div className="flex flex-col sm:flex-row gap-2">
+              {/* 검색 타입 선택 드롭다운 */}
+              <Select value={searchType} onValueChange={handleSearchTypeChange}>
+                <SelectTrigger className="w-full sm:w-32 shadow-none rounded-none">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="rounded-none">
+                  <SelectItem value="all">전체</SelectItem>
+                  <SelectItem value="title">제목</SelectItem>
+                  <SelectItem value="content">내용</SelectItem>
+                  <SelectItem value="author">작성자</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* 검색 입력 필드 */}
+              <div className="flex-1">
+                <EnhancedSearchInput
+                  value={searchTerm}
+                  onChange={handleSearchInputChange}
+                  onSearch={handleSearch}
+                  placeholder={getPlaceholder()}
+                  className="w-full"
+                />
+              </div>
+            </div>
           </div>
-          <div className="flex-1 flex justify-end">
+          <div className="flex justify-end">
             <Link href="/board/write">
               <Button className="w-full sm:w-auto shadow-none">
                 새 글 작성
@@ -408,67 +642,124 @@ export default function BoardPage() {
           </div>
         </div>
 
-        {/* 페이지네이션 */}
+        {/* 개선된 페이지네이션 */}
         {totalPages > 1 && (
-          <div className="mt-6">
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    className={
-                      currentPage === 1
-                        ? "pointer-events-none opacity-50"
-                        : "cursor-pointer"
-                    }
-                  />
-                </PaginationItem>
+          <div className="mt-6 space-y-4">
+            {/* 데스크톱 페이지네이션 */}
+            <div className="hidden sm:block">
+              <Pagination>
+                <PaginationContent>
+                  {/* 맨 처음으로 */}
+                  <PaginationItem>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handlePageChange(1)}
+                      disabled={currentPage === 1}
+                      className="h-8 w-8 p-0 border-0 shadow-none"
+                    >
+                      <ChevronFirst className="h-4 w-4" />
+                    </Button>
+                  </PaginationItem>
 
-                {/* 페이지 번호들 */}
-                {Array.from({ length: totalPages }, (_, i) => {
-                  const pageNumber = i + 1;
-                  const isCurrentPage = pageNumber === currentPage;
+                  {/* 이전 페이지 */}
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      className={
+                        currentPage === 1
+                          ? "pointer-events-none opacity-50"
+                          : "cursor-pointer"
+                      }
+                    />
+                  </PaginationItem>
 
-                  // 현재 페이지 주변 페이지만 표시 (최대 5개)
-                  const showPage =
-                    pageNumber === 1 ||
-                    pageNumber === totalPages ||
-                    (pageNumber >= currentPage - 1 &&
-                      pageNumber <= currentPage + 1);
-
-                  if (!showPage) return null;
-
-                  return (
-                    <PaginationItem key={pageNumber}>
-                      <PaginationLink
-                        onClick={() => handlePageChange(pageNumber)}
-                        isActive={isCurrentPage}
-                        className="cursor-pointer"
-                      >
-                        {pageNumber}
-                      </PaginationLink>
+                  {/* 스마트 페이지 번호들 */}
+                  {generatePageNumbers().map((page, index) => (
+                    <PaginationItem key={`${page}-${index}`}>
+                      {page === "..." ? (
+                        <span className="px-4 py-2 text-muted-foreground">
+                          ...
+                        </span>
+                      ) : (
+                        <PaginationLink
+                          onClick={() => handlePageChange(page as number)}
+                          isActive={page === currentPage}
+                          className="cursor-pointer"
+                        >
+                          {page}
+                        </PaginationLink>
+                      )}
                     </PaginationItem>
-                  );
-                })}
+                  ))}
 
-                <PaginationItem>
-                  <PaginationNext
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    className={
-                      currentPage === totalPages
-                        ? "pointer-events-none opacity-50"
-                        : "cursor-pointer"
-                    }
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
+                  {/* 다음 페이지 */}
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      className={
+                        currentPage === totalPages
+                          ? "pointer-events-none opacity-50"
+                          : "cursor-pointer"
+                      }
+                    />
+                  </PaginationItem>
+
+                  {/* 맨 마지막으로 */}
+                  <PaginationItem>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handlePageChange(totalPages)}
+                      disabled={currentPage === totalPages}
+                      className="h-8 w-8 p-0 border-0 shadow-none"
+                    >
+                      <ChevronLast className="h-4 w-4" />
+                    </Button>
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+
+            {/* 모바일 간단 페이지네이션 */}
+            <div className="sm:hidden">
+              <div className="flex items-center justify-between">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="flex items-center gap-1 border-0 shadow-none"
+                >
+                  <ChevronFirst className="h-4 w-4" />
+                  이전
+                </Button>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    {currentPage} / {totalPages}
+                  </span>
+                </div>
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="flex items-center gap-1 border-0 shadow-none"
+                >
+                  다음
+                  <ChevronLast className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
 
             {/* 페이지 정보 */}
-            <div className="text-center mt-4 text-xs sm:text-sm text-muted-foreground">
-              {filteredPosts.length}개의 게시글 중 {startIndex + 1}-
-              {Math.min(endIndex, filteredPosts.length)}번째 표시 (페이지{" "}
-              {currentPage}/{totalPages})
+            <div className="text-center text-xs sm:text-sm text-muted-foreground">
+              {startIndex + 1}-{Math.min(endIndex, filteredPosts.length)}번째
+              표시
+              <span className="mx-2">·</span>
+              페이지 {currentPage} / {totalPages}
             </div>
           </div>
         )}

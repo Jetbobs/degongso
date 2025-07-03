@@ -17,6 +17,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { Menu } from "lucide-react";
@@ -32,6 +33,7 @@ const Header = () => {
     { href: "/board/portfolio", label: "포트폴리오자랑" },
     { href: "/board/education", label: "무료교육" },
     { href: "/login", label: "로그인" },
+    { href: "/register", label: "회원가입" },
   ];
 
   return (
@@ -43,54 +45,57 @@ const Header = () => {
             DEGONGSO
           </Link>
 
-          {/* 데스크톱 네비게이션 */}
-          <NavigationMenu className="hidden md:block">
-            <NavigationMenuList>
-              {menuItems.map((item) => (
-                <NavigationMenuItem key={item.href}>
-                  <NavigationMenuLink asChild>
-                    <Link
-                      href={item.href}
-                      className={navigationMenuTriggerStyle()}
-                    >
-                      {item.label}
-                    </Link>
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-              ))}
-            </NavigationMenuList>
-          </NavigationMenu>
-
-          {/* 모바일 햄버거 메뉴 */}
-          <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="md:hidden"
-                aria-label="메뉴 열기"
-              >
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[250px] sm:w-[300px]">
-              <SheetHeader>
-                <SheetTitle>메뉴</SheetTitle>
-              </SheetHeader>
-              <nav className="flex flex-col space-y-4 mt-6">
+          {/* 데스크톱 네비게이션과 토글 */}
+          <div className="flex items-center">
+            <NavigationMenu className="hidden md:block">
+              <NavigationMenuList>
                 {menuItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="text-base font-bold hover:text-primary transition-colors pl-4"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {item.label}
-                  </Link>
+                  <NavigationMenuItem key={item.href}>
+                    <NavigationMenuLink asChild>
+                      <Link
+                        href={item.href}
+                        className={navigationMenuTriggerStyle()}
+                      >
+                        {item.label}
+                      </Link>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
                 ))}
-              </nav>
-            </SheetContent>
-          </Sheet>
+                <NavigationMenuItem>
+                  <ThemeToggle />
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+
+            {/* 모바일용 토글과 햄버거 메뉴 */}
+            <div className="flex items-center gap-2 md:hidden">
+              <ThemeToggle />
+              <Sheet open={isOpen} onOpenChange={setIsOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="sm" aria-label="메뉴 열기">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[250px] sm:w-[300px]">
+                  <SheetHeader>
+                    <SheetTitle>메뉴</SheetTitle>
+                  </SheetHeader>
+                  <nav className="flex flex-col space-y-4 mt-6">
+                    {menuItems.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className="text-base font-bold hover:text-primary transition-colors pl-4"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </nav>
+                </SheetContent>
+              </Sheet>
+            </div>
+          </div>
         </div>
       </div>
     </header>
