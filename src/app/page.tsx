@@ -25,6 +25,7 @@ const dashboardData = {
         author: "김개발",
         date: "2024-01-15",
         views: 245,
+        likes: 12,
       },
       {
         id: 2,
@@ -32,6 +33,7 @@ const dashboardData = {
         author: "박프론트",
         date: "2024-01-14",
         views: 182,
+        likes: 8,
       },
       {
         id: 3,
@@ -39,6 +41,7 @@ const dashboardData = {
         author: "이타입",
         date: "2024-01-14",
         views: 167,
+        likes: 15,
       },
     ],
     jobs: [
@@ -48,6 +51,7 @@ const dashboardData = {
         author: "스타트업A",
         date: "2024-01-15",
         budget: "300만원",
+        likes: 5,
       },
       {
         id: 2,
@@ -55,6 +59,7 @@ const dashboardData = {
         author: "회사B",
         date: "2024-01-14",
         budget: "200만원",
+        likes: 3,
       },
       {
         id: 3,
@@ -62,6 +67,7 @@ const dashboardData = {
         author: "개인사업자C",
         date: "2024-01-13",
         budget: "500만원",
+        likes: 8,
       },
     ],
     portfolio: [
@@ -71,6 +77,7 @@ const dashboardData = {
         author: "디자이너김",
         date: "2024-01-15",
         tech: "Next.js",
+        likes: 22,
       },
       {
         id: 2,
@@ -78,6 +85,7 @@ const dashboardData = {
         author: "풀스택이",
         date: "2024-01-14",
         tech: "React",
+        likes: 18,
       },
       {
         id: 3,
@@ -85,6 +93,7 @@ const dashboardData = {
         author: "게임러",
         date: "2024-01-13",
         tech: "Unity",
+        likes: 31,
       },
     ],
     education: [
@@ -94,6 +103,7 @@ const dashboardData = {
         author: "교육전문가",
         date: "2024-01-15",
         students: 45,
+        likes: 16,
       },
       {
         id: 2,
@@ -101,6 +111,7 @@ const dashboardData = {
         author: "코딩선생",
         date: "2024-01-14",
         students: 78,
+        likes: 24,
       },
       {
         id: 3,
@@ -108,6 +119,7 @@ const dashboardData = {
         author: "개발멘토",
         date: "2024-01-13",
         students: 92,
+        likes: 19,
       },
     ],
   },
@@ -227,7 +239,8 @@ export default function Home() {
                           {post.title}
                         </h4>
                         <p className="text-xs text-muted-foreground">
-                          {post.author} · {post.date} · 조회 {post.views}
+                          {post.author} · {post.date} · 조회 {post.views} · 추천{" "}
+                          {post.likes}
                         </p>
                       </div>
                     </div>
@@ -272,7 +285,8 @@ export default function Home() {
                           {post.title}
                         </h4>
                         <p className="text-xs text-muted-foreground">
-                          {post.author} · {post.date} · {post.budget}
+                          {post.author} · {post.date} · {post.budget} · 추천{" "}
+                          {post.likes}
                         </p>
                       </div>
                       <Badge variant="outline" className="text-xs">
@@ -320,7 +334,8 @@ export default function Home() {
                           {post.title}
                         </h4>
                         <p className="text-xs text-muted-foreground">
-                          {post.author} · {post.date} · {post.tech}
+                          {post.author} · {post.date} · {post.tech} · 추천{" "}
+                          {post.likes}
                         </p>
                       </div>
                       <Badge variant="outline" className="text-xs">
@@ -369,6 +384,7 @@ export default function Home() {
                         </h4>
                         <p className="text-xs text-muted-foreground">
                           {post.author} · {post.date} · 수강생 {post.students}명
+                          · 추천 {post.likes}
                         </p>
                       </div>
                       <Badge variant="outline" className="text-xs">

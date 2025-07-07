@@ -17,6 +17,7 @@ const dummyPost = {
   author: "김개발",
   date: "2024-01-15",
   views: 245,
+  likes: 12,
   content: `
 <p>Next.js 14가 출시되었습니다! 이번 업데이트에서는 많은 새로운 기능들이 추가되었습니다.</p>
 
@@ -96,13 +97,21 @@ export default function EditPage() {
     }
 
     // 수정된 게시글 데이터
+    const savedPost = localStorage.getItem(`post_${postId}`);
     const updatedPost = {
       id: parseInt(postId as string),
       title: formData.title,
       author: formData.author,
-      date: dummyPost.date, // 원래 작성일 유지
+      date: savedPost
+        ? JSON.parse(savedPost).date || dummyPost.date
+        : dummyPost.date, // 원래 작성일 유지
       lastModified: new Date().toISOString().split("T")[0], // 수정일 추가
-      views: dummyPost.views,
+      views: savedPost
+        ? JSON.parse(savedPost).views || dummyPost.views
+        : dummyPost.views,
+      likes: savedPost
+        ? JSON.parse(savedPost).likes || dummyPost.likes
+        : dummyPost.likes,
       content: formData.content,
     };
 

@@ -20,6 +20,7 @@ import { PostDetailSkeleton } from "@/components/LoadingStates";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { ThumbsUp } from "lucide-react";
 
 // 더미 데이터
 const dummyPost = {
@@ -28,6 +29,7 @@ const dummyPost = {
   author: "김개발",
   date: "2024-01-15",
   views: 245,
+  likes: 12,
   lastModified: undefined as string | undefined,
   content: `
 <p>Next.js 14가 출시되었습니다! 이번 업데이트에서는 많은 새로운 기능들이 추가되었습니다.</p>
@@ -69,6 +71,8 @@ export default function PostDetailPage() {
 
   const [currentPost, setCurrentPost] = useState(dummyPost);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(dummyPost.likes);
 
   // 페이지 로드 시 localStorage에서 수정된 데이터 확인
   useEffect(() => {
@@ -82,13 +86,53 @@ export default function PostDetailPage() {
       if (savedPost) {
         const parsedPost = JSON.parse(savedPost);
         setCurrentPost(parsedPost);
+        setLikesCount(parsedPost.likes || dummyPost.likes);
       }
+
+      // 좋아요 상태 확인
+      const likedPosts = JSON.parse(
+        localStorage.getItem("liked_posts") || "[]"
+      );
+      setIsLiked(likedPosts.includes(Number(postId)));
 
       setIsLoading(false);
     };
 
     loadPost();
   }, [postId]);
+
+  const handleLike = () => {
+    const likedPosts = JSON.parse(localStorage.getItem("liked_posts") || "[]");
+    const postIdNum = Number(postId);
+
+    if (isLiked) {
+      // 좋아요 취소
+      const newLikedPosts = likedPosts.filter((id: number) => id !== postIdNum);
+      localStorage.setItem("liked_posts", JSON.stringify(newLikedPosts));
+      setIsLiked(false);
+      setLikesCount((prev) => prev - 1);
+
+      // 게시글 데이터 업데이트
+      const updatedPost = { ...currentPost, likes: likesCount - 1 };
+      localStorage.setItem(`post_${postId}`, JSON.stringify(updatedPost));
+      setCurrentPost(updatedPost);
+
+      toast.success("추천을 취소했습니다!");
+    } else {
+      // 좋아요 추가
+      const newLikedPosts = [...likedPosts, postIdNum];
+      localStorage.setItem("liked_posts", JSON.stringify(newLikedPosts));
+      setIsLiked(true);
+      setLikesCount((prev) => prev + 1);
+
+      // 게시글 데이터 업데이트
+      const updatedPost = { ...currentPost, likes: likesCount + 1 };
+      localStorage.setItem(`post_${postId}`, JSON.stringify(updatedPost));
+      setCurrentPost(updatedPost);
+
+      toast.success("추천했습니다!");
+    }
+  };
 
   const handleDelete = () => {
     console.log(`게시글 ${postId} 삭제`);
@@ -137,7 +181,10 @@ export default function PostDetailPage() {
                       <span>수정일: {currentPost.lastModified}</span>
                     )}
                   </div>
-                  <span>조회수: {currentPost.views}</span>
+                  <div className="flex items-center gap-4">
+                    <span>조회수: {currentPost.views}</span>
+                    <span>추천: {likesCount}</span>
+                  </div>
                 </div>
               </CardHeader>
             </Card>
@@ -153,6 +200,24 @@ export default function PostDetailPage() {
                 />
               </CardContent>
             </Card>
+
+            {/* 좋아요 버튼 */}
+            <div className="flex justify-center mt-4 sm:mt-6">
+              <Button
+                onClick={handleLike}
+                variant={isLiked ? "default" : "outline"}
+                className={`flex items-center gap-2 shadow-none ${
+                  isLiked
+                    ? "bg-blue-500 hover:bg-blue-600 text-white"
+                    : "hover:bg-blue-50 hover:text-blue-500 hover:border-blue-500"
+                }`}
+              >
+                <ThumbsUp
+                  className={`h-4 w-4 ${isLiked ? "fill-current" : ""}`}
+                />
+                {isLiked ? "추천 취소" : "추천"} ({likesCount})
+              </Button>
+            </div>
 
             {/* 하단 버튼 */}
             <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-0 sm:space-x-2 mt-4 sm:mt-6">
@@ -198,7 +263,11 @@ export default function PostDetailPage() {
 
         {/* 댓글 섹션 */}
         {postId && !isLoading && (
-          <CommentSection postId={Array.isArray(postId) ? postId[0] : postId} />
+          <div className="mt-6 sm:mt-8">
+            <CommentSection
+              postId={Array.isArray(postId) ? postId[0] : postId}
+            />
+          </div>
         )}
       </div>
     </div>

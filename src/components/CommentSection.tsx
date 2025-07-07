@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -204,7 +203,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
       <div className={level > 0 ? "ml-8" : ""}>
         <Card
           className={`shadow-none border-none rounded-none ${
-            level > 0 ? "!py-0" : ""
+            level > 0 ? "!py-0" : "!pt-0"
           }`}
         >
           <CardContent
