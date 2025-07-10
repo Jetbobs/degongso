@@ -97,6 +97,47 @@ export default function CommentSection({ postId }: CommentSectionProps) {
     loadComments();
   }, [postId]);
 
+  // 실시간 댓글 업데이트
+  useEffect(() => {
+    const checkForNewComments = () => {
+      const savedComments = localStorage.getItem(`comments_${postId}`);
+      if (savedComments) {
+        const parsedComments = JSON.parse(savedComments);
+        if (parsedComments.length !== comments.length) {
+          setComments(parsedComments);
+
+          // 새로운 댓글이 있으면 알림
+          if (parsedComments.length > comments.length) {
+            toast.info("새로운 댓글이 있습니다!", {
+              duration: 2000,
+            });
+          }
+        }
+      }
+    };
+
+    // 5초마다 새로운 댓글 확인
+    const interval = setInterval(checkForNewComments, 5000);
+
+    // localStorage 변경 감지 (다른 탭에서 댓글 작성 시)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === `comments_${postId}` && e.newValue) {
+        const newComments = JSON.parse(e.newValue);
+        if (newComments.length > comments.length) {
+          setComments(newComments);
+          toast.info("실시간으로 새로운 댓글이 추가되었습니다!");
+        }
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, [postId, comments.length]);
+
   // 댓글 저장
   const saveComments = (newComments: Comment[]) => {
     localStorage.setItem(`comments_${postId}`, JSON.stringify(newComments));
@@ -200,18 +241,65 @@ export default function CommentSection({ postId }: CommentSectionProps) {
     const isParent = level === 0;
 
     return (
-      <div className={level > 0 ? "ml-8" : ""}>
+      <div className={level > 0 ? "sm:ml-8" : ""}>
         <Card
           className={`shadow-none border-none rounded-none ${
             level > 0 ? "!py-0" : "!pt-0"
           }`}
         >
           <CardContent
-            className={`mx-6 border-t border-b ${
-              level > 0 ? "!bg-gray-50 !px-2 !py-0" : "px-0 py-4"
+            className={`mx-6 border-t border-b relative ${
+              level > 0
+                ? "!bg-gray-50 dark:!bg-gray-800 !px-2 py-2 sm:!py-0"
+                : "px-0 py-4"
             }`}
           >
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-3">
+            {/* 모바일에서 상단 오른쪽에 위치할 버튼들 */}
+            <div className="absolute top-3 right-3 flex gap-2 sm:hidden">
+              <Button
+                variant="outline"
+                size="sm"
+                className="shadow-none text-xs h-6 px-2"
+                onClick={() => toggleReplyForm(comment.id)}
+              >
+                답글
+              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="shadow-none text-xs h-6 px-2"
+                  >
+                    삭제
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="mx-4 max-w-md">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      {isParent ? "댓글을" : "답글을"} 삭제하시겠습니까?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      이 작업은 되돌릴 수 없습니다.{" "}
+                      {isParent ? "댓글과 모든 답글이" : "답글이"} 영구적으로
+                      삭제됩니다.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogAction
+                      onClick={() => handleDelete(comment.id)}
+                      className="bg-black text-white hover:bg-gray-800"
+                    >
+                      삭제
+                    </AlertDialogAction>
+                    <AlertDialogCancel>취소</AlertDialogCancel>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+
+            {/* 데스크탑에서 기존 레이아웃 유지 */}
+            <div className="hidden sm:flex sm:justify-between sm:items-start gap-2 mb-3">
               <div className="flex flex-wrap gap-2 sm:gap-4 text-sm text-muted-foreground">
                 <span className="font-medium text-foreground">
                   {level > 0 ? "↳ " : ""}
@@ -262,11 +350,23 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                 </AlertDialog>
               </div>
             </div>
+
+            {/* 모바일에서 사용자 정보만 표시 */}
+            <div className="flex flex-col gap-2 mb-3 sm:hidden">
+              <div className="flex flex-wrap gap-2 text-sm text-muted-foreground pr-20">
+                <span className="font-medium text-foreground">
+                  {level > 0 ? "↳ " : ""}
+                  {comment.author}
+                </span>
+                <span>{comment.date}</span>
+              </div>
+            </div>
+
             <div className="text-sm whitespace-pre-wrap">{comment.content}</div>
 
             {/* 답글 작성 폼 */}
             {replyForms[comment.id] && (
-              <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+              <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <div className="space-y-3">
                   <Label className="text-sm">답글 작성</Label>
                   <Textarea

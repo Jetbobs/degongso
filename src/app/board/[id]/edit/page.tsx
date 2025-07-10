@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { FileUpload as FileUploadType } from "@/types";
 
 // 더미 데이터
 const dummyPost = {
@@ -62,6 +63,8 @@ export default function EditPage() {
     content: "",
   });
 
+  const [uploadedFiles, setUploadedFiles] = useState<FileUploadType[]>([]);
+
   // 페이지 로드 시 기존 데이터 불러오기
   useEffect(() => {
     // localStorage에서 수정된 데이터가 있는지 확인
@@ -113,12 +116,12 @@ export default function EditPage() {
         ? JSON.parse(savedPost).likes || dummyPost.likes
         : dummyPost.likes,
       content: formData.content,
+      fileUrls: uploadedFiles.map((file) => file.url || "").filter(Boolean),
     };
 
     // localStorage에 수정된 데이터 저장
     localStorage.setItem(`post_${postId}`, JSON.stringify(updatedPost));
 
-    console.log("게시글 수정:", updatedPost);
     toast.success("게시글이 수정되었습니다!");
     router.push(`/board/${postId}`);
   };
@@ -136,6 +139,10 @@ export default function EditPage() {
       ...prev,
       content,
     }));
+  };
+
+  const handleFileUpload = (files: FileUploadType[]) => {
+    setUploadedFiles((prev) => [...prev, ...files]);
   };
 
   return (
@@ -196,6 +203,10 @@ export default function EditPage() {
                 <TiptapEditor
                   content={formData.content}
                   onChange={handleContentChange}
+                  onFileUpload={handleFileUpload}
+                  maxFileSize={10}
+                  acceptedFileTypes={["image/*", "video/*", "application/pdf"]}
+                  maxFiles={5}
                 />
               </div>
 

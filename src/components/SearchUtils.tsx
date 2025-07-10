@@ -149,7 +149,7 @@ export function EnhancedSearchInput({
           onFocus={handleInputFocus}
           onBlur={() => setTimeout(() => setIsOpen(false), 200)} // 클릭 이벤트가 발생할 시간을 줌
           placeholder={placeholder}
-          className="pl-10 pr-20 shadow-none"
+          className="pl-10 pr-20 shadow-none text-xs md:text-sm truncate"
         />
         <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
           {value && (

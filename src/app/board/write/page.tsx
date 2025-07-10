@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { FileUpload as FileUploadType } from "@/types";
 
 export default function WritePage() {
   const router = useRouter();
@@ -16,6 +17,8 @@ export default function WritePage() {
     title: "",
     content: "",
   });
+
+  const [uploadedFiles, setUploadedFiles] = useState<FileUploadType[]>([]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,9 +34,9 @@ export default function WritePage() {
       date: new Date().toISOString().split("T")[0],
       views: 0,
       content: formData.content,
+      fileUrls: uploadedFiles.map((file) => file.url || "").filter(Boolean),
     };
 
-    console.log("새 게시글:", newPost);
     toast.success("게시글이 작성되었습니다!");
     router.push("/board");
   };
@@ -51,6 +54,10 @@ export default function WritePage() {
       ...prev,
       content,
     }));
+  };
+
+  const handleFileUpload = (files: FileUploadType[]) => {
+    setUploadedFiles((prev) => [...prev, ...files]);
   };
 
   return (
@@ -97,6 +104,10 @@ export default function WritePage() {
                 <TiptapEditor
                   content={formData.content}
                   onChange={handleContentChange}
+                  onFileUpload={handleFileUpload}
+                  maxFileSize={10}
+                  acceptedFileTypes={["image/*", "video/*", "application/pdf"]}
+                  maxFiles={5}
                 />
               </div>
 

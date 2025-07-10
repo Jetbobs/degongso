@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -22,9 +23,6 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
-    // 임시 로그인 로직 (실제로는 서버 API 호출)
-    console.log("로그인 시도:", formData);
 
     // 사용자 인증 확인
     const users = JSON.parse(localStorage.getItem("users") || "[]");
@@ -68,11 +66,23 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         {/* 로고 및 타이틀 */}
         <div className="text-center mb-6 sm:mb-8">
-          <Link
-            href="/"
-            className="text-2xl sm:text-3xl font-bold text-foreground"
-          >
-            DEGONGSO
+          <Link href="/" className="inline-block">
+            <Image
+              src="/logo/디공소 로고(kr_black).png"
+              alt="DEGONGSO"
+              width={150}
+              height={50}
+              className="h-10 sm:h-12 w-auto dark:hidden"
+              priority
+            />
+            <Image
+              src="/logo/디공소 로고(kr_white).png"
+              alt="DEGONGSO"
+              width={150}
+              height={50}
+              className="h-10 sm:h-12 w-auto hidden dark:block"
+              priority
+            />
           </Link>
         </div>
 

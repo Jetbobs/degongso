@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -21,59 +22,69 @@ import { PostDetailSkeleton } from "@/components/LoadingStates";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { ThumbsUp } from "lucide-react";
+import { ThumbsUp, Calendar, DollarSign, Code } from "lucide-react";
 
-// 더미 데이터
-const dummyPost = {
+// 외주구인 더미 데이터
+const dummyJobPost = {
   id: 1,
-  title: "Next.js 14 새로운 기능 소개",
-  author: "김개발",
+  title: "React.js 웹앱 개발 프로젝트 구인",
+  author: "스타트업A",
   date: "2024-01-15",
-  views: 245,
-  likes: 12,
+  views: 145,
+  likes: 8,
   lastModified: undefined as string | undefined,
+  budget: "3000만원",
+  period: "3개월",
+  skills: ["React.js", "TypeScript", "Next.js"],
   content: `
-<p>Next.js 14가 출시되었습니다! 이번 업데이트에서는 많은 새로운 기능들이 추가되었습니다.</p>
+<h2>프로젝트 개요</h2>
+<p>React.js와 TypeScript를 사용한 SaaS 플랫폼 개발 프로젝트입니다. 경력 3년 이상의 프론트엔드 개발자를 찾고 있습니다.</p>
 
-<h2>주요 변경사항</h2>
-
-<h3>1. Server Components 개선</h3>
+<h3>주요 업무</h3>
 <ul>
-  <li>React Server Components가 안정화되었습니다</li>
-  <li>더 나은 성능과 사용자 경험을 제공합니다</li>
+  <li>React.js 기반 웹 애플리케이션 개발</li>
+  <li>TypeScript를 활용한 타입 안정성 확보</li>
+  <li>Next.js 프레임워크 활용</li>
+  <li>반응형 UI/UX 구현</li>
+  <li>REST API 연동</li>
 </ul>
 
-<h3>2. Turbopack 안정화</h3>
+<h3>필수 요구사항</h3>
 <ul>
-  <li>개발 환경에서 Webpack 대신 Turbopack 사용 가능</li>
-  <li>빠른 번들링 속도를 경험할 수 있습니다</li>
+  <li>React.js 경력 3년 이상</li>
+  <li>TypeScript 사용 경험</li>
+  <li>Next.js 프레임워크 경험</li>
+  <li>Git 사용 가능</li>
 </ul>
 
-<h3>3. App Router 개선</h3>
+<h3>우대사항</h3>
 <ul>
-  <li>라우팅 시스템이 더욱 강력해졌습니다</li>
-  <li>Parallel Routes와 Intercepting Routes 지원</li>
+  <li>SaaS 플랫폼 개발 경험</li>
+  <li>Tailwind CSS 사용 경험</li>
+  <li>상태 관리 라이브러리 경험 (Redux, Zustand 등)</li>
+  <li>테스트 코드 작성 경험</li>
 </ul>
 
-<h3>4. 새로운 메타데이터 API</h3>
+<h3>근무 조건</h3>
 <ul>
-  <li>SEO 최적화가 더욱 쉬워졌습니다</li>
-  <li>동적 메타데이터 생성 지원</li>
+  <li>원격 근무 가능</li>
+  <li>주 5일 근무</li>
+  <li>유연한 근무 시간</li>
 </ul>
 
-<p>이 밖에도 많은 개선사항들이 있으니 <strong>공식 문서</strong>를 참고해주세요!</p>
+<p><strong>포트폴리오와 함께 지원해주세요!</strong></p>
   `.trim(),
 };
 
-export default function PostDetailPage() {
+export default function JobPostDetailPage() {
   const params = useParams();
   const router = useRouter();
   const postId = params.id;
 
-  const [currentPost, setCurrentPost] = useState(dummyPost);
+  const [currentPost, setCurrentPost] = useState(dummyJobPost);
   const [isLoading, setIsLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
-  const [likesCount, setLikesCount] = useState(dummyPost.likes);
+  const [likesCount, setLikesCount] = useState(dummyJobPost.likes);
 
   // 페이지 로드 시 localStorage에서 수정된 데이터 확인
   useEffect(() => {
@@ -83,16 +94,16 @@ export default function PostDetailPage() {
       // 로딩 시뮬레이션
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      const savedPost = localStorage.getItem(`post_${postId}`);
+      const savedPost = localStorage.getItem(`jobs_post_${postId}`);
       if (savedPost) {
         const parsedPost = JSON.parse(savedPost);
         setCurrentPost(parsedPost);
-        setLikesCount(parsedPost.likes || dummyPost.likes);
+        setLikesCount(parsedPost.likes || dummyJobPost.likes);
       }
 
       // 좋아요 상태 확인
       const likedPosts = JSON.parse(
-        localStorage.getItem("liked_posts") || "[]"
+        localStorage.getItem("liked_jobs_posts") || "[]"
       );
       setIsLiked(likedPosts.includes(Number(postId)));
 
@@ -103,32 +114,34 @@ export default function PostDetailPage() {
   }, [postId]);
 
   const handleLike = () => {
-    const likedPosts = JSON.parse(localStorage.getItem("liked_posts") || "[]");
+    const likedPosts = JSON.parse(
+      localStorage.getItem("liked_jobs_posts") || "[]"
+    );
     const postIdNum = Number(postId);
 
     if (isLiked) {
       // 좋아요 취소
       const newLikedPosts = likedPosts.filter((id: number) => id !== postIdNum);
-      localStorage.setItem("liked_posts", JSON.stringify(newLikedPosts));
+      localStorage.setItem("liked_jobs_posts", JSON.stringify(newLikedPosts));
       setIsLiked(false);
       setLikesCount((prev) => prev - 1);
 
       // 게시글 데이터 업데이트
       const updatedPost = { ...currentPost, likes: likesCount - 1 };
-      localStorage.setItem(`post_${postId}`, JSON.stringify(updatedPost));
+      localStorage.setItem(`jobs_post_${postId}`, JSON.stringify(updatedPost));
       setCurrentPost(updatedPost);
 
       toast.success("추천을 취소했습니다!");
     } else {
       // 좋아요 추가
       const newLikedPosts = [...likedPosts, postIdNum];
-      localStorage.setItem("liked_posts", JSON.stringify(newLikedPosts));
+      localStorage.setItem("liked_jobs_posts", JSON.stringify(newLikedPosts));
       setIsLiked(true);
       setLikesCount((prev) => prev + 1);
 
       // 게시글 데이터 업데이트
       const updatedPost = { ...currentPost, likes: likesCount + 1 };
-      localStorage.setItem(`post_${postId}`, JSON.stringify(updatedPost));
+      localStorage.setItem(`jobs_post_${postId}`, JSON.stringify(updatedPost));
       setCurrentPost(updatedPost);
 
       toast.success("추천했습니다!");
@@ -137,13 +150,13 @@ export default function PostDetailPage() {
 
   const handleDelete = () => {
     // localStorage에서도 삭제
-    localStorage.removeItem(`post_${postId}`);
-    toast.success("게시글이 삭제되었습니다!");
-    router.push("/board");
+    localStorage.removeItem(`jobs_post_${postId}`);
+    toast.success("프로젝트가 삭제되었습니다!");
+    router.push("/board/jobs");
   };
 
   const handleEdit = () => {
-    router.push(`/board/${postId}/edit`);
+    router.push(`/board/jobs/${postId}/edit`);
   };
 
   return (
@@ -151,7 +164,7 @@ export default function PostDetailPage() {
       <div className="max-w-4xl mx-auto">
         {/* 헤더 */}
         <div className="mb-0 sm:mb-2 sm:mt-2 py-2 md:py-0">
-          <Link href="/board">
+          <Link href="/board/jobs">
             <Button
               variant="outline"
               className="border-none shadow-none text-sm "
@@ -167,39 +180,79 @@ export default function PostDetailPage() {
           <PostDetailSkeleton />
         ) : (
           <>
-            {/* 게시글 정보 */}
+            {/* 프로젝트 정보 */}
             <Card className="border-none shadow-none">
               <CardHeader className="px-4 sm:px-6">
                 <CardTitle className="text-lg sm:text-xl lg:text-2xl leading-tight">
                   {currentPost.title}
                 </CardTitle>
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 text-xs sm:text-sm text-muted-foreground">
-                  <div className="flex flex-wrap gap-2 sm:gap-4">
-                    <span>작성자: {currentPost.author}</span>
-                    <span>작성일: {currentPost.date}</span>
-                    {currentPost.lastModified && (
-                      <span>수정일: {currentPost.lastModified}</span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <span>조회수: {currentPost.views}</span>
-                    <span>추천: {likesCount}</span>
-                    <div className="flex items-center">
-                      <SocialActions
-                        postId={Number(postId)}
-                        title={currentPost.title}
-                        author={currentPost.author}
-                        type="post"
-                      />
+                <div className="flex flex-col gap-4">
+                  {/* 기본 정보 */}
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+                    <div className="flex flex-wrap gap-2 sm:gap-4">
+                      <span>회사명: {currentPost.author}</span>
+                      <span>등록일: {currentPost.date}</span>
+                      {currentPost.lastModified && (
+                        <span>수정일: {currentPost.lastModified}</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span>조회수: {currentPost.views}</span>
+                      <span>추천: {likesCount}</span>
+                      <div className="flex items-center">
+                        <SocialActions
+                          postId={Number(postId)}
+                          title={currentPost.title}
+                          author={currentPost.author}
+                          type="post"
+                        />
+                      </div>
                     </div>
                   </div>
+
+                  {/* 프로젝트 세부 정보 */}
+                  <div className="flex flex-wrap gap-4 pt-2 border-t">
+                    <div className="flex items-center gap-2 text-sm">
+                      <DollarSign className="h-4 w-4 text-green-600" />
+                      <span className="font-medium">예산:</span>
+                      <span className="text-green-600 font-semibold">
+                        {currentPost.budget}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Calendar className="h-4 w-4 text-blue-600" />
+                      <span className="font-medium">기간:</span>
+                      <span className="text-blue-600 font-semibold">
+                        {currentPost.period}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* 기술 스택 */}
+                  {currentPost.skills && (
+                    <div className="flex flex-wrap gap-2 pt-2">
+                      <div className="flex items-center gap-2">
+                        <Code className="h-4 w-4 text-purple-600" />
+                        <span className="text-sm font-medium">기술스택:</span>
+                      </div>
+                      {currentPost.skills.map((skill, index) => (
+                        <Badge
+                          key={index}
+                          variant="outline"
+                          className="text-purple-600 border-purple-600"
+                        >
+                          {skill}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </CardHeader>
             </Card>
 
             <Separator className="mb-4 sm:mb-6" />
 
-            {/* 게시글 내용 */}
+            {/* 프로젝트 내용 */}
             <Card className="rounded-none shadow-none">
               <CardContent className="pt-4 sm:pt-6 px-4 sm:px-6">
                 <div
@@ -209,7 +262,7 @@ export default function PostDetailPage() {
               </CardContent>
             </Card>
 
-            {/* 좋아요 버튼 */}
+            {/* 관심 프로젝트 버튼 */}
             <div className="flex justify-center mt-4 sm:mt-6">
               <Button
                 onClick={handleLike}
@@ -223,7 +276,7 @@ export default function PostDetailPage() {
                 <ThumbsUp
                   className={`h-4 w-4 ${isLiked ? "fill-current" : ""}`}
                 />
-                {isLiked ? "추천 취소" : "추천"} ({likesCount})
+                {isLiked ? "관심 취소" : "관심 프로젝트"} ({likesCount})
               </Button>
             </div>
           </>
@@ -257,10 +310,10 @@ export default function PostDetailPage() {
               <AlertDialogContent className="mx-4 max-w-md">
                 <AlertDialogHeader>
                   <AlertDialogTitle>
-                    게시글을 삭제하시겠습니까?
+                    프로젝트를 삭제하시겠습니까?
                   </AlertDialogTitle>
                   <AlertDialogDescription>
-                    이 작업은 되돌릴 수 없습니다. 게시글이 영구적으로
+                    이 작업은 되돌릴 수 없습니다. 프로젝트가 영구적으로
                     삭제됩니다.
                   </AlertDialogDescription>
                 </AlertDialogHeader>

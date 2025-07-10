@@ -39,315 +39,191 @@ import { useState, useEffect, useMemo } from "react";
 import { ChevronFirst, ChevronLast } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
-// 더미 데이터
+// 외주구인 더미 데이터
 const dummyPosts = [
   {
     id: 1,
-    title: "Next.js 14 새로운 기능 소개",
-    author: "김개발",
+    title: "React.js 웹앱 개발 프로젝트 구인",
+    author: "스타트업A",
     date: "2024-01-15",
-    views: 245,
-    likes: 12,
+    views: 145,
+    likes: 8,
     content:
-      "Next.js 14에서는 Server Components, Turbopack, App Router 등 많은 새로운 기능들이 추가되었습니다. 특히 성능 개선과 개발자 경험 향상에 중점을 두었습니다.",
+      "React.js와 TypeScript를 사용한 SaaS 플랫폼 개발 프로젝트입니다. 경력 3년 이상의 프론트엔드 개발자를 찾고 있습니다. 기간: 3개월, 예산: 협의 가능",
+    budget: "3000만원",
+    period: "3개월",
+    skills: ["React.js", "TypeScript", "Next.js"],
   },
   {
     id: 2,
-    title: "Tailwind CSS 활용 팁",
-    author: "이디자인",
+    title: "Node.js 백엔드 API 개발 외주",
+    author: "테크기업B",
     date: "2024-01-14",
-    views: 189,
-    likes: 8,
+    views: 98,
+    likes: 5,
     content:
-      "Tailwind CSS를 효율적으로 사용하는 방법들을 소개합니다. 유틸리티 클래스, 커스텀 컴포넌트, 반응형 디자인 구현 방법 등을 다룹니다.",
+      "Node.js 기반 RESTful API 개발 프로젝트입니다. Express.js, MongoDB 경험이 있는 백엔드 개발자를 찾습니다.",
+    budget: "2000만원",
+    period: "2개월",
+    skills: ["Node.js", "Express.js", "MongoDB"],
   },
   {
     id: 3,
-    title: "shadcn/ui 컴포넌트 사용법",
-    author: "박프론트",
+    title: "모바일 앱 UI/UX 디자인 의뢰",
+    author: "앱개발회사C",
     date: "2024-01-13",
     views: 167,
-    likes: 15,
+    likes: 12,
     content:
-      "shadcn/ui는 Radix UI 기반의 아름다운 컴포넌트 라이브러리입니다. 설치부터 커스터마이징까지 전체적인 사용법을 설명합니다.",
+      "iOS/Android 모바일 앱의 UI/UX 디자인을 의뢰합니다. Figma 사용 가능하고 모바일 디자인 경험이 풍부한 디자이너 우대",
+    budget: "1500만원",
+    period: "1.5개월",
+    skills: ["Figma", "UI/UX", "모바일디자인"],
   },
   {
     id: 4,
-    title: "React 18의 새로운 훅들",
-    author: "최리액트",
+    title: "Flutter 크로스플랫폼 앱 개발",
+    author: "스타트업D",
     date: "2024-01-12",
-    views: 298,
-    likes: 23,
+    views: 234,
+    likes: 15,
     content:
-      "React 18에서 추가된 useId, useTransition, useDeferredValue 등의 새로운 훅들과 Concurrent Features에 대해 알아봅니다.",
+      "Flutter를 사용한 크로스플랫폼 모바일 앱 개발 프로젝트입니다. Firebase 연동 경험 필수입니다.",
+    budget: "4000만원",
+    period: "4개월",
+    skills: ["Flutter", "Dart", "Firebase"],
   },
   {
     id: 5,
-    title: "TypeScript 5.0 업데이트",
-    author: "정타입",
+    title: "Vue.js 웹사이트 리뉴얼 프로젝트",
+    author: "쇼핑몰E",
     date: "2024-01-11",
-    views: 221,
-    likes: 19,
+    views: 189,
+    likes: 9,
     content:
-      "TypeScript 5.0의 주요 변경사항들을 살펴봅니다. Decorators, const assertions, 성능 개선 사항들을 중심으로 설명합니다.",
+      "기존 레거시 웹사이트를 Vue.js로 리뉴얼하는 프로젝트입니다. Vuex, Vue Router 경험 필수",
+    budget: "2500만원",
+    period: "3개월",
+    skills: ["Vue.js", "Vuex", "Vue Router"],
   },
   {
     id: 6,
-    title: "웹 개발 트렌드 2024",
-    author: "홍트렌드",
+    title: "Python Django 웹 애플리케이션 개발",
+    author: "교육회사F",
     date: "2024-01-10",
-    views: 412,
-    likes: 31,
+    views: 156,
+    likes: 7,
     content:
-      "2024년 웹 개발 트렌드를 분석합니다. AI 도구 활용, 풀스택 프레임워크, 엣지 컴퓨팅, 웹 성능 최적화 등의 키워드를 중심으로 살펴봅니다.",
+      "Django 기반 온라인 교육 플랫폼 개발 프로젝트입니다. PostgreSQL, Redis 경험 우대",
+    budget: "3500만원",
+    period: "5개월",
+    skills: ["Python", "Django", "PostgreSQL"],
   },
   {
     id: 7,
-    title: "자바스크립트 ES2024 새 기능",
-    author: "송자바",
+    title: "WordPress 쇼핑몰 커스터마이징",
+    author: "온라인쇼핑몰G",
     date: "2024-01-09",
-    views: 356,
-    likes: 27,
+    views: 123,
+    likes: 6,
     content:
-      "ES2024에서 추가된 새로운 자바스크립트 기능들을 소개합니다. 새로운 메서드, 연산자, 문법 등을 예제와 함께 설명합니다.",
+      "WooCommerce 기반 WordPress 쇼핑몰 커스터마이징 작업입니다. PHP, MySQL 경험 필수",
+    budget: "800만원",
+    period: "1개월",
+    skills: ["WordPress", "WooCommerce", "PHP"],
   },
   {
     id: 8,
-    title: "CSS Grid vs Flexbox 언제 쓸까?",
-    author: "이디자인",
+    title: "Spring Boot 마이크로서비스 개발",
+    author: "핀테크H",
     date: "2024-01-08",
-    views: 189,
-    likes: 14,
+    views: 278,
+    likes: 18,
     content:
-      "CSS Grid와 Flexbox의 차이점을 알아보고, 각각을 언제 사용해야 하는지 실제 예제를 통해 설명합니다.",
+      "Spring Boot 기반 마이크로서비스 아키텍처 구축 프로젝트입니다. Docker, Kubernetes 경험 필수",
+    budget: "5000만원",
+    period: "6개월",
+    skills: ["Spring Boot", "Docker", "Kubernetes"],
   },
   {
     id: 9,
-    title: "Node.js 성능 최적화 방법",
-    author: "백엔드김",
+    title: "React Native 모바일 앱 개발",
+    author: "헬스케어I",
     date: "2024-01-07",
-    views: 267,
-    likes: 16,
+    views: 201,
+    likes: 11,
     content:
-      "Node.js 애플리케이션의 성능을 개선하는 다양한 방법들을 소개합니다. 메모리 관리, 비동기 처리, 캐싱 전략 등을 다룹니다.",
+      "헬스케어 관련 React Native 모바일 앱 개발 프로젝트입니다. REST API 연동 경험 필수",
+    budget: "2800만원",
+    period: "3.5개월",
+    skills: ["React Native", "JavaScript", "REST API"],
   },
   {
     id: 10,
-    title: "Git 브랜치 전략 가이드",
-    author: "데브옵스박",
+    title: "Unity 3D 게임 개발 외주",
+    author: "게임회사J",
     date: "2024-01-06",
-    views: 198,
-    likes: 11,
+    views: 345,
+    likes: 22,
     content:
-      "효과적인 Git 브랜치 전략에 대해 알아봅니다. Git Flow, GitHub Flow, GitLab Flow 등의 워크플로우를 비교분석합니다.",
+      "Unity 3D를 사용한 모바일 게임 개발 프로젝트입니다. C# 프로그래밍과 3D 그래픽 경험 필수",
+    budget: "6000만원",
+    period: "8개월",
+    skills: ["Unity 3D", "C#", "3D Graphics"],
   },
   {
     id: 11,
-    title: "모바일 반응형 디자인 팁",
-    author: "모바일정",
+    title: "Angular 기업용 대시보드 개발",
+    author: "기업솔루션K",
     date: "2024-01-05",
-    views: 145,
-    likes: 9,
+    views: 132,
+    likes: 8,
     content:
-      "모바일 우선 반응형 디자인의 핵심 원칙과 실무 팁을 소개합니다. 미디어 쿼리, 플렉시블 그리드, 터치 인터페이스 고려사항 등을 다룹니다.",
+      "Angular를 사용한 기업용 데이터 대시보드 개발 프로젝트입니다. Chart.js, D3.js 경험 우대",
+    budget: "2200만원",
+    period: "2.5개월",
+    skills: ["Angular", "TypeScript", "Chart.js"],
   },
   {
     id: 12,
-    title: "웹 접근성 개선하기",
-    author: "접근성최",
+    title: "Laravel PHP 웹사이트 개발",
+    author: "의료법인L",
     date: "2024-01-04",
-    views: 123,
-    likes: 7,
+    views: 98,
+    likes: 4,
     content:
-      "웹 접근성 가이드라인 WCAG를 바탕으로 모든 사용자가 이용할 수 있는 웹사이트를 만드는 방법을 설명합니다.",
+      "Laravel 프레임워크를 사용한 의료진 관리 웹사이트 개발 프로젝트입니다. MySQL, Redis 경험 필수",
+    budget: "1800만원",
+    period: "2개월",
+    skills: ["Laravel", "PHP", "MySQL"],
   },
   {
     id: 13,
-    title: "API 설계 베스트 프랙티스",
-    author: "백엔드김",
+    title: "Svelte 웹앱 프론트엔드 개발",
+    author: "스타트업M",
     date: "2024-01-03",
-    views: 289,
-    likes: 22,
-  },
-  {
-    id: 14,
-    title: "데이터베이스 설계 원칙",
-    author: "디비전문가",
-    date: "2024-01-02",
-    views: 234,
-    likes: 18,
-  },
-  {
-    id: 15,
-    title: "Docker 컨테이너 최적화",
-    author: "데브옵스박",
-    date: "2024-01-01",
-    views: 178,
-    likes: 13,
-  },
-  {
-    id: 16,
-    title: "프론트엔드 테스트 전략",
-    author: "테스터강",
-    date: "2023-12-31",
-    views: 156,
+    views: 167,
     likes: 10,
   },
   {
-    id: 17,
-    title: "웹팩 vs Vite 성능 비교",
-    author: "빌드도구맨",
-    date: "2023-12-30",
-    views: 201,
-    likes: 15,
-  },
-  {
-    id: 18,
-    title: "PWA 개발 가이드",
-    author: "모바일정",
-    date: "2023-12-29",
-    views: 167,
-    likes: 12,
-  },
-  {
-    id: 19,
-    title: "GraphQL vs REST API",
-    author: "API설계자",
-    date: "2023-12-28",
-    views: 245,
-    likes: 20,
-  },
-  {
-    id: 20,
-    title: "코드 리뷰 효율적으로 하기",
-    author: "리뷰왕",
-    date: "2023-12-27",
-    views: 198,
-    likes: 17,
-  },
-  {
-    id: 21,
-    title: "웹 보안 기본 가이드",
-    author: "보안전문가",
-    date: "2023-12-26",
-    views: 389,
-    likes: 25,
-  },
-  {
-    id: 22,
-    title: "마이크로프론트엔드 아키텍처",
-    author: "아키텍트윤",
-    date: "2023-12-25",
-    views: 278,
-    likes: 19,
-  },
-  {
-    id: 23,
-    title: "웹 성능 측정 도구들",
-    author: "성능튜너",
-    date: "2023-12-24",
-    views: 134,
-    likes: 8,
-  },
-  {
-    id: 24,
-    title: "서버리스 아키텍처 소개",
-    author: "클라우드김",
-    date: "2023-12-23",
-    views: 298,
-    likes: 21,
-  },
-  {
-    id: 25,
-    title: "웹 어셈블리(WASM) 시작하기",
-    author: "저수준개발자",
-    date: "2023-12-22",
-    views: 112,
-    likes: 6,
-  },
-  {
-    id: 26,
-    title: "크로스 브라우저 호환성",
-    author: "호환성박사",
-    date: "2023-12-21",
-    views: 187,
-    likes: 11,
-  },
-  {
-    id: 27,
-    title: "웹 애니메이션 라이브러리 비교",
-    author: "애니메이션장",
-    date: "2023-12-20",
-    views: 156,
-    likes: 14,
-  },
-  {
-    id: 28,
-    title: "상태 관리 라이브러리 선택 가이드",
-    author: "상태관리왕",
-    date: "2023-12-19",
-    views: 301,
-    likes: 23,
-  },
-  {
-    id: 29,
-    title: "웹 컴포넌트 표준 활용하기",
-    author: "표준준수자",
-    date: "2023-12-18",
-    views: 98,
-    likes: 5,
-  },
-  {
-    id: 30,
-    title: "JAMstack 아키텍처 이해하기",
-    author: "정적사이트",
-    date: "2023-12-17",
-    views: 167,
+    id: 14,
+    title: "Express.js REST API 개발",
+    author: "테크기업N",
+    date: "2024-01-02",
+    views: 189,
     likes: 13,
   },
   {
-    id: 31,
-    title: "웹 폰트 최적화 전략",
-    author: "폰트마스터",
-    date: "2023-12-16",
-    views: 143,
-    likes: 9,
-  },
-  {
-    id: 32,
-    title: "CSS 변수 활용 방법",
-    author: "CSS마법사",
-    date: "2023-12-15",
-    views: 198,
-    likes: 16,
-  },
-  {
-    id: 33,
-    title: "웹 워커로 성능 개선하기",
-    author: "성능최적화",
-    date: "2023-12-14",
+    id: 15,
+    title: "React 컴포넌트 라이브러리 구축",
+    author: "디자인시스템O",
+    date: "2024-01-01",
     views: 234,
-    likes: 18,
-  },
-  {
-    id: 34,
-    title: "브라우저 렌더링 최적화",
-    author: "렌더링전문가",
-    date: "2023-12-13",
-    views: 276,
-    likes: 22,
-  },
-  {
-    id: 35,
-    title: "웹 스토리지 전략 가이드",
-    author: "스토리지매니저",
-    date: "2023-12-12",
-    views: 165,
-    likes: 12,
+    likes: 16,
   },
 ];
 
-export default function BoardPage() {
+export default function JobsBoardPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [postsPerPage, setPostsPerPage] = useState(25);
   const [searchTerm, setSearchTerm] = useState("");
@@ -363,141 +239,94 @@ export default function BoardPage() {
     // 몇 개 게시글에 더미 댓글 데이터 추가 (테스트용)
     const addDummyComments = () => {
       // 기존 댓글 데이터를 삭제하고 새로운 대댓글 구조로 업데이트
-      localStorage.removeItem("comments_1");
-      localStorage.removeItem("comments_2");
-      localStorage.removeItem("comments_4");
-      localStorage.removeItem("comments_6");
+      localStorage.removeItem("jobs_comments_1");
+      localStorage.removeItem("jobs_comments_4");
+      localStorage.removeItem("jobs_comments_8");
 
-      // 게시글 1번에 댓글 3개 (대댓글 포함)
-      if (!localStorage.getItem("comments_1")) {
+      // 외주구인 게시글 1번에 댓글 2개
+      if (!localStorage.getItem("jobs_comments_1")) {
         const comments1 = [
           {
             id: 1,
             postId: 1,
-            author: "댓글러1",
-            content: "좋은 정보네요! 감사합니다.",
+            author: "프론트개발자A",
+            content: "React 경력 4년차입니다. 포트폴리오 확인 후 연락 주세요!",
             date: "2024-01-16",
           },
           {
             id: 2,
             postId: 1,
-            author: "개발자A",
-            content: "저도 동감입니다! 특히 Turbopack 기능이 기대되네요.",
-            date: "2024-01-16",
-            parentId: 1,
-          },
-          {
-            id: 3,
-            postId: 1,
-            author: "프론트엔드B",
-            content:
-              "App Router도 정말 혁신적이라고 생각해요! 개발 경험이 훨씬 좋아졌네요.",
-            date: "2024-01-16",
-            parentId: 1,
-          },
-          {
-            id: 4,
-            postId: 1,
-            author: "디자이너C",
-            content: "디자인 관점에서도 도움이 많이 되었어요!",
+            author: "풀스택개발자B",
+            content: "TypeScript 경험 풍부합니다. 참여 희망합니다.",
             date: "2024-01-16",
           },
         ];
-        localStorage.setItem("comments_1", JSON.stringify(comments1));
+        localStorage.setItem("jobs_comments_1", JSON.stringify(comments1));
       }
 
-      // 게시글 2번에 댓글 1개
-      if (!localStorage.getItem("comments_2")) {
-        const comments2 = [
-          {
-            id: 1,
-            postId: 2,
-            author: "디자이너A",
-            content: "CSS 팁 유용해요! 실무에 바로 적용해보겠습니다.",
-            date: "2024-01-15",
-          },
-        ];
-        localStorage.setItem("comments_2", JSON.stringify(comments2));
-      }
-
-      // 게시글 4번에 댓글 5개 (대댓글 포함)
-      if (!localStorage.getItem("comments_4")) {
+      // 외주구인 게시글 4번에 댓글 3개
+      if (!localStorage.getItem("jobs_comments_4")) {
         const comments4 = [
           {
             id: 1,
             postId: 4,
-            author: "리액트팬",
+            author: "Flutter개발자C",
             content:
-              "새로운 훅들 정말 유용하네요. 특히 useTransition이 인상 깊어요.",
+              "Flutter 앱 개발 경력 3년입니다. Firebase 연동 경험 있습니다.",
             date: "2024-01-13",
           },
           {
             id: 2,
             postId: 4,
-            author: "개발자B",
-            content:
-              "useTransition 써봤는데 정말 좋더라구요! UI가 훨씬 부드러워졌어요.",
+            author: "모바일개발자D",
+            content: "크로스플랫폼 개발 전문입니다. 상세 논의 원합니다.",
             date: "2024-01-13",
-            parentId: 1,
           },
           {
             id: 3,
             postId: 4,
-            author: "코더C",
-            content:
-              "Concurrent Features 기대됩니다. 성능 개선에 큰 도움이 될 것 같아요.",
+            author: "앱개발팀E",
+            content: "팀 단위 지원 가능합니다. 레퍼런스 많습니다.",
             date: "2024-01-13",
-            parentId: 1,
+          },
+        ];
+        localStorage.setItem("jobs_comments_4", JSON.stringify(comments4));
+      }
+
+      // 외주구인 게시글 8번에 댓글 4개
+      if (!localStorage.getItem("jobs_comments_8")) {
+        const comments8 = [
+          {
+            id: 1,
+            postId: 8,
+            author: "백엔드전문가F",
+            content:
+              "Spring Boot 마이크로서비스 구축 경험 다수 보유하고 있습니다.",
+            date: "2024-01-09",
+          },
+          {
+            id: 2,
+            postId: 8,
+            author: "DevOps엔지니어G",
+            content: "Docker, Kubernetes 운영 경험 5년차입니다.",
+            date: "2024-01-09",
+          },
+          {
+            id: 3,
+            postId: 8,
+            author: "클라우드전문가H",
+            content: "AWS 기반 마이크로서비스 아키텍처 설계 가능합니다.",
+            date: "2024-01-09",
           },
           {
             id: 4,
-            postId: 4,
-            author: "프론트엔드D",
-            content:
-              "예제 코드도 있으면 좋겠어요. 실제 구현 방법이 궁금합니다.",
-            date: "2024-01-13",
-          },
-          {
-            id: 5,
-            postId: 4,
-            author: "개발초보",
-            content:
-              "설명이 이해하기 쉬워요! React 18 공부하는데 도움이 많이 됐습니다.",
-            date: "2024-01-13",
-            parentId: 4,
+            postId: 8,
+            author: "시니어개발자I",
+            content: "핀테크 도메인 경험 있습니다. 참여 희망합니다.",
+            date: "2024-01-09",
           },
         ];
-        localStorage.setItem("comments_4", JSON.stringify(comments4));
-      }
-
-      // 게시글 6번에 댓글 2개 (대댓글 포함)
-      if (!localStorage.getItem("comments_6")) {
-        const comments6 = [
-          {
-            id: 1,
-            postId: 6,
-            author: "트렌드워처",
-            content:
-              "2024년 트렌드 잘 정리해주셨네요. AI 도구 활용 부분이 특히 인상깊어요.",
-            date: "2024-01-11",
-          },
-          {
-            id: 2,
-            postId: 6,
-            author: "개발매니저",
-            content: "팀에 공유했습니다. 올해 기술 로드맵 수립에 참고하겠어요.",
-            date: "2024-01-11",
-          },
-          {
-            id: 3,
-            postId: 6,
-            author: "풀스택개발자",
-            content: "엣지 컴퓨팅 트렌드도 정말 중요한 것 같아요!",
-            date: "2024-01-11",
-            parentId: 1,
-          },
-        ];
-        localStorage.setItem("comments_6", JSON.stringify(comments6));
+        localStorage.setItem("jobs_comments_8", JSON.stringify(comments8));
       }
     };
 
@@ -508,7 +337,7 @@ export default function BoardPage() {
 
   // 댓글 개수 가져오기 함수
   const getCommentCount = (postId: number): number => {
-    const savedComments = localStorage.getItem(`comments_${postId}`);
+    const savedComments = localStorage.getItem(`jobs_comments_${postId}`);
     if (savedComments) {
       return JSON.parse(savedComments).length;
     }
@@ -528,11 +357,18 @@ export default function BoardPage() {
           return post.author.toLowerCase().includes(lowerSearchTerm);
         case "content":
           return post.content?.toLowerCase().includes(lowerSearchTerm);
+        case "skills":
+          return post.skills?.some((skill) =>
+            skill.toLowerCase().includes(lowerSearchTerm)
+          );
         default:
           return (
             post.title.toLowerCase().includes(lowerSearchTerm) ||
             post.author.toLowerCase().includes(lowerSearchTerm) ||
-            post.content?.toLowerCase().includes(lowerSearchTerm)
+            post.content?.toLowerCase().includes(lowerSearchTerm) ||
+            post.skills?.some((skill) =>
+              skill.toLowerCase().includes(lowerSearchTerm)
+            )
           );
       }
     });
@@ -602,6 +438,8 @@ export default function BoardPage() {
         return "검색어를 입력해주세요";
       case "author":
         return "검색어를 입력해주세요";
+      case "skills":
+        return "검색어를 입력해주세요";
       case "all":
       default:
         return "검색어를 입력해주세요";
@@ -666,7 +504,7 @@ export default function BoardPage() {
       <div className="max-w-6xl mx-auto">
         {/* 헤더 */}
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-2xl sm:text-3xl font-bold">게시판</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">외주구인게시판</h1>
 
           {/* 페이지 당 항목 수 선택 */}
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -714,12 +552,14 @@ export default function BoardPage() {
                       <TableHead className="w-[60px] sm:w-[80px] text-xs sm:text-sm text-center">
                         번호
                       </TableHead>
-                      <TableHead className="text-xs sm:text-sm">제목</TableHead>
-                      <TableHead className="hidden sm:table-cell w-[120px] text-xs sm:text-sm text-center">
-                        작성자
+                      <TableHead className="text-xs sm:text-sm">
+                        프로젝트명
                       </TableHead>
                       <TableHead className="hidden sm:table-cell w-[120px] text-xs sm:text-sm text-center">
-                        작성일
+                        회사명
+                      </TableHead>
+                      <TableHead className="hidden sm:table-cell w-[120px] text-xs sm:text-sm text-center">
+                        등록일
                       </TableHead>
                       <TableHead className="hidden sm:table-cell w-[80px] text-xs sm:text-sm text-center">
                         조회
@@ -739,7 +579,7 @@ export default function BoardPage() {
                         </TableCell>
                         <TableCell className="text-xs sm:text-sm">
                           <Link
-                            href={`/board/${post.id}`}
+                            href={`/board/jobs/${post.id}`}
                             className="cursor-pointer hover:text-primary hover:underline line-clamp-2 sm:line-clamp-1"
                           >
                             <HighlightText
@@ -762,6 +602,28 @@ export default function BoardPage() {
                               · {post.date} · 조회 {post.views} · 추천{" "}
                               {post.likes}
                             </div>
+                            {post.budget && post.period && (
+                              <div className="text-blue-600">
+                                예산 {post.budget} · 기간 {post.period}
+                              </div>
+                            )}
+                            {post.skills && (
+                              <div className="flex flex-wrap gap-1">
+                                {post.skills.slice(0, 3).map((skill, idx) => (
+                                  <span
+                                    key={idx}
+                                    className="inline-block bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-1.5 py-0.5 rounded text-xs"
+                                  >
+                                    {skill}
+                                  </span>
+                                ))}
+                                {post.skills.length > 3 && (
+                                  <span className="text-gray-500">
+                                    +{post.skills.length - 3}
+                                  </span>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </TableCell>
                         <TableCell className="hidden sm:table-cell text-xs sm:text-sm text-center">
@@ -788,7 +650,7 @@ export default function BoardPage() {
           )}
         </div>
 
-        {/* 검색 및 새 글 작성 */}
+        {/* 검색 및 새 프로젝트 등록 */}
         <div className="mt-6 mb-6 flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
           <SearchStats
             totalCount={dummyPosts.length}
@@ -808,13 +670,16 @@ export default function BoardPage() {
                     전체
                   </SelectItem>
                   <SelectItem value="title" className="text-xs md:text-sm">
-                    제목
+                    프로젝트명
                   </SelectItem>
                   <SelectItem value="content" className="text-xs md:text-sm">
                     내용
                   </SelectItem>
                   <SelectItem value="author" className="text-xs md:text-sm">
-                    작성자
+                    회사명
+                  </SelectItem>
+                  <SelectItem value="skills" className="text-xs md:text-sm">
+                    기술스택
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -832,9 +697,9 @@ export default function BoardPage() {
             </div>
           </div>
           <div className="flex justify-end">
-            <Link href="/board/write">
+            <Link href="/board/jobs/write">
               <Button className="w-full sm:w-auto shadow-none">
-                새 글 작성
+                프로젝트 등록
               </Button>
             </Link>
           </div>
